@@ -4,12 +4,10 @@ import openai
 import os
 from fastapi.middleware.cors import CORSMiddleware
 
-# Получаем ключ из переменной окружения
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
-# Разрешаем CORS (чтобы фронтенд мог обращаться)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,11 +15,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Структура запроса
 class TextRequest(BaseModel):
     text: str
 
-# Эндпоинт анализа текста
 @app.post("/analyze")
 async def analyze_text(data: TextRequest):
     prompt = f"""
@@ -39,10 +35,11 @@ async def analyze_text(data: TextRequest):
   "rewrite": "..."
 }}
 """
-    response = openai.ChatCompletion.create(
+    client = openai.OpenAI()  # 👈 новый синтаксис
+    chat_response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7
     )
-    content = response.choices[0].message.content
-    return eval(content)
+    content = chat_response.choices[0].message.content
+    return eval(content)  # можно позже заменить на json.loads()

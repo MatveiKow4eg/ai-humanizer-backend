@@ -1,18 +1,16 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-import openai
 import os
+import openai
 from fastapi.middleware.cors import CORSMiddleware
 
-# Используем OpenRouter + DeepSeek
 client = openai.OpenAI(
-    api_key=os.getenv("OPENROUTER_API_KEY"),
-    base_url="https://openrouter.ai/api/v1"
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY")
 )
 
 app = FastAPI()
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,10 +38,13 @@ async def analyze_text(data: TextRequest):
   "rewrite": "..."
 }}
 """
+
     response = client.chat.completions.create(
-        model="deepseek-chat",  # или "deepseek-coder", если хочешь более строго
-        messages=[{"role": "user", "content": prompt}],
+        model="deepseek-chat",  # или deepseek-coder, если хочешь
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
         temperature=0.7
     )
-    content = response.choices[0].message.content
-    return eval(content)  # Можно заменить на json.loads, если вернётся валидный JSON
+
+    return eval(response.choices[0].message.content)

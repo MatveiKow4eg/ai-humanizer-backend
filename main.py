@@ -4,7 +4,7 @@ import openai
 import os
 from fastapi.middleware.cors import CORSMiddleware
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
 

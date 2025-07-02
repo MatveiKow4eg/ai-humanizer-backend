@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import openai
 import os
+import json
 from fastapi.middleware.cors import CORSMiddleware
 
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -35,11 +36,16 @@ async def analyze_text(data: TextRequest):
   "rewrite": "..."
 }}
 """
-    client = openai.OpenAI()  # 👈 новый синтаксис
+
     chat_response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7
     )
+
     content = chat_response.choices[0].message.content
-    return eval(content)  # можно позже заменить на json.loads()
+
+    try:
+        return json.loads(content)
+    except:
+        return {"error": "Модель вернула неверный JSON", "raw": content}
